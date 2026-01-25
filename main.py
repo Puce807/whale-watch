@@ -8,6 +8,10 @@ def cli():
     pass
 
 @cli.command()
+def update():
+    update_git()
+
+@cli.command()
 def ls():
     print(list_containers(client))
 

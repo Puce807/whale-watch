@@ -9,9 +9,7 @@ def update_git():
     log("Checking for new commits...", 2)
     result = subprocess.run(["git", "rev-parse", "HEAD"],
                                   capture_output=True,
-                                  text=True, check=True,
-                                  stdout=subprocess.DEVNULL,
-                                  stderr=subprocess.DEVNULL)
+                                  text=True, check=True,)
     local_commit = result.stdout.strip()
     result = subprocess.run(["git", "ls-remote","origin", "HEAD"],
                                  capture_output=True,
