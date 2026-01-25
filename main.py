@@ -1,11 +1,15 @@
 import docker
+from click import version_option
 from rich.console import Console
 from rich.table import Table
 from docker_cmds import *
 from config import *
 from utils import update_git, check_git
 
+__version__ = "0.1.0"
+
 @click.group()
+@version_option(version=__version__, prog_name="Whale Watch", message="%(prog)s version %(version)s", help="Show CLI version", short_name="v")
 def cli():
     pass
 
@@ -14,6 +18,7 @@ def update():
     """Pulls new commits from the repository"""
     update_git()
     log("Local repository updated successfully", 2)
+
 
 @cli.command()
 @click.option("--status", "-s", default="all",
@@ -34,7 +39,10 @@ def ls(status):
             status_color = STATUS_COLORS.get(c_status, "white")
             table.add_row(container, short_id, f"[{status_color}]{c_status}[/{status_color}]")
 
-    console.print(table)
+    if table.rows:
+        console.print(table)
+    else:
+        print("No containers found")
 
 if __name__ == "__main__":
     if AUTO_GIT_PULL:
