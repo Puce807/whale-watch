@@ -19,7 +19,6 @@ def update():
     update_git()
     log("Local repository updated successfully", 2)
 
-@cli.command(name="v")
 @cli.command(name="version")
 @click.option("-g", "--git", is_flag=True, help="Include git info")
 def version(git):
