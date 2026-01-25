@@ -3,7 +3,7 @@ from rich.console import Console
 from rich.table import Table
 from docker_cmds import *
 from config import *
-from utils import update_git
+from utils import update_git, check_git
 
 @click.group()
 def cli():
@@ -32,7 +32,15 @@ def ls():
     console.print(table)
 
 if __name__ == "__main__":
-    if AUTO_GIT_PULL: update_git()
+    if AUTO_GIT_PULL:
+        if not check_git(): update_git()
+    elif CHECK_GIT:
+        if not check_git():
+            print("Local repository outdated")
+            answer = input("Pull new commits from repository? [y, n]")
+            if answer.lower() == "y":
+                update_git()
+
     client = docker.from_env()
     console = Console()
 

@@ -1,3 +1,4 @@
-DEBUG = 2 # 0 = No debug, 1 = Warning Messages, 2 = Info
+DEBUG = 2 # 0 = No debug (essential messages only), 1 = Warning Messages, 2 = Info
 
-AUTO_GIT_PULL = False # Pull from the repository if there are new commits
+AUTO_GIT_PULL = True # Pull from the repository if there are new commits
+CHECK_GIT = True # Check for new git commits and warn the user. Note: Has no effect if `AUTO_GIT_PULL` is True
