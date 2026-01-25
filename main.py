@@ -1,4 +1,5 @@
 import docker
+from pygments.lexer import default
 from rich.console import Console
 from rich.table import Table
 from docker_cmds import *
@@ -8,13 +9,8 @@ from utils import *
 __version__ = "0.1.0"
 
 @click.group()
-@click.option("-v", "--version", is_flag=True, help="Show version")
-def cli(version):
+def cli():
     """ Whale Watch CLI """
-    if version:
-        current_commit = get_local_commit()
-        commit_msg = get_commit_message(current_commit)
-        print(f"Whale Watch Version {__version__} Commit Message '{commit_msg}'")
     pass
 
 @cli.command()
@@ -23,6 +19,16 @@ def update():
     update_git()
     log("Local repository updated successfully", 2)
 
+@cli.command(name="v")
+@cli.command(name="version")
+@click.option("-g", "--git", is_flag=True, help="Include git info")
+def version(git):
+    """Displays version"""
+    current_commit = get_local_commit()
+    commit_msg = get_commit_message(current_commit)
+    print(f"Whale Watch Version {__version__}")
+    if git:
+        print(f"Commit: {current_commit} Message: {commit_msg}")
 
 @cli.command()
 @click.option("--status", "-s", default="all",
@@ -54,7 +60,7 @@ if __name__ == "__main__":
     elif PROMPT_UPDATES:
         if not check_git():
             print("Local repository outdated")
-            answer = input("Pull new commits from repository? [y, n]")
+            answer = input("Pull new commits from repository? [y, n] ")
             if answer.lower() == "y":
                 update_git()
 
