@@ -20,7 +20,7 @@ if __name__ == "__main__":
     if AUTO_GIT_PULL: update_git()
     client = docker.from_env()
 
-    id_containers = list_containers(cli)
+    id_containers = list_containers(client)
     named_containers = {info["name"]: {"id": c_id, "status": info["status"]} for c_id, info in id_containers.items()}
 
     cli()
