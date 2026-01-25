@@ -1,17 +1,20 @@
 import docker
-from click import version_option
 from rich.console import Console
 from rich.table import Table
 from docker_cmds import *
 from config import *
-from utils import update_git, check_git
+from utils import *
 
 __version__ = "0.1.0"
 
 @click.group()
-@version_option(version=__version__, prog_name="Whale Watch", help="Shows version of Whale Watch CLI")
-def cli():
+@click.option("-v", "--version", help="Show version")
+def cli(version):
     """ Whale Watch CLI """
+    if version:
+        current_commit = get_local_commit()
+        commit_msg = get_commit_message(current_commit)
+        print(f"Whale Watch Version {__version__} Commit Message '{commit_msg}'")
     pass
 
 @cli.command()

@@ -5,11 +5,17 @@ def log(msg, tier):
     if DEBUG >= tier:
         print(msg)
 
-def check_git():
+def get_commit_message(commit):
+    result = subprocess.run(["git", "log", "--format=%B", "-n", "1", commit])
+
+def get_local_commit():
     result = subprocess.run(["git", "rev-parse", "HEAD"],
                             capture_output=True,
                             text=True, check=True, )
-    local_commit = result.stdout.strip()
+    return result.stdout.strip()
+
+def check_git():
+    local_commit = get_local_commit()
     result = subprocess.run(["git", "ls-remote", "origin", "HEAD"],
                             capture_output=True,
                             text=True, check=True)
