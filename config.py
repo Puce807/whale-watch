@@ -12,3 +12,4 @@ STATUS_COLORS = {
     "removing": "magenta",
     "dead": "grey50"
 }
+CONTAINER_STATUS = ["all", "created", "restarting", "running", "removing", "paused", "exited", "dead"]

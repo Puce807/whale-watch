@@ -41,8 +41,8 @@ def version(git):
         print(f"Commit: {current_commit} Message: {commit_msg}")
 
 @cli.command()
-@click.option("--status", "-s", default="all",
-              type=click.Choice(["all", "created", "restarting", "running", "removing", "paused", "exited", "dead"]),
+@click.option("-s", "--status", default="all",
+              type=click.Choice(CONTAINER_STATUS),
               help="Filter output by container status. Eg: running")
 def ls(status):
     """List all docker containers"""
@@ -65,9 +65,11 @@ def ls(status):
         print("No containers found")
 
 @cli.command()
-def stats():
+@click.option("-s", "--status", default="running", type=click.Choice(CONTAINER_STATUS),
+              help="Filter stats by container status")
+def stats(status):
     """Get docker container stats"""
-    print(container_stats(client))
+    print(container_stats(client, status))
 
 if __name__ == "__main__":
     try: client = docker.from_env()
