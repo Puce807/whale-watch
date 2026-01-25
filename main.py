@@ -11,12 +11,16 @@ def cli():
 
 @cli.command()
 def update():
+    """Pulls new commits from the repository"""
     update_git()
+    log("Local repository updated successfully", 2)
 
 @cli.command()
-def ls():
+@click.option("--status", "-s", default="all",
+              type=click.Choice(["all", "created", "restarting", "running", "removing", "paused", "exited", "dead"]),
+              help="Filter output by container status. Eg: running")
+def ls(status):
     """List all docker containers"""
-    # TO DO: Add flags for showing running and exited
     table = Table(title="Docker Containers")
 
     table.add_column("Name", style="cyan", no_wrap=True)
@@ -24,10 +28,11 @@ def ls():
     table.add_column("Status", style="cyan")
 
     for container, info in named_containers.items():
-        status = info["status"]
-        short_id = info["id"]
-        status_color = "green" if status == "running" else "red"
-        table.add_row(container, short_id, f"[{status_color}]{info['status']}[/{status_color}]")
+        c_status = info["status"]
+        if status == "all" or c_status == status:
+            short_id = info["id"]
+            status_color = STATUS_COLORS.get(c_status, "white")
+            table.add_row(container, short_id, f"[{status_color}]{c_status}[/{status_color}]")
 
     console.print(table)
 
