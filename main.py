@@ -8,7 +8,7 @@ from utils import *
 __version__ = "0.1.0"
 
 @click.group()
-@click.option("-v", "--version", help="Show version")
+@click.option("-v", "--version", is_flag=True, help="Show version")
 def cli(version):
     """ Whale Watch CLI """
     if version:
@@ -51,14 +51,17 @@ def ls(status):
 if __name__ == "__main__":
     if AUTO_GIT_PULL:
         if not check_git(): update_git()
-    elif CHECK_GIT:
+    elif PROMPT_UPDATES:
         if not check_git():
             print("Local repository outdated")
             answer = input("Pull new commits from repository? [y, n]")
             if answer.lower() == "y":
                 update_git()
 
-    client = docker.from_env()
+    try: client = docker.from_env()
+    except:
+        log("ERROR: Docker not found", 0)
+        client = ""
     console = Console()
 
     id_containers = list_containers(client)
