@@ -6,7 +6,7 @@ def log(msg, tier):
         print(msg)
 
 def get_commit_message(commit):
-    result = subprocess.run(["git", "log", "--format=%B", "-n", "1", commit])
+    result = subprocess.run(["git", "log", "--format=%B", "-n", "1", commit], capture_output=True)
 
 def get_local_commit():
     result = subprocess.run(["git", "rev-parse", "HEAD"],

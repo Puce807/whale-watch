@@ -14,3 +14,12 @@ def list_containers(client):
     }
 
     return container_dict
+
+def container_stats(client):
+    container_names = list_containers(client).keys()
+    stat_dict = {}
+    for c_id in container_names:
+        container = client.containers.get(c_id)
+        stats = container.stats(stream=False)
+        stat_dict[c_id] = stats
+    return stat_dict

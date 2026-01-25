@@ -6,7 +6,7 @@ from docker_cmds import *
 from config import *
 from utils import *
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 @click.group()
 def cli():
@@ -52,6 +52,11 @@ def ls(status):
         console.print(table)
     else:
         print("No containers found")
+
+@click.command()
+def stats():
+    """Get docker container stats"""
+    print(container_stats(client))
 
 if __name__ == "__main__":
     if AUTO_GIT_PULL:
