@@ -8,12 +8,9 @@ def list_containers(client):
         log("WARN: No containers found", 1)
         return None
 
-    container_dict = {}
-    for container in containers:
-        name = container.name
-        status = container.status
-        short_id = container.short_id
-        container_dict[short_id]["name"] = name
-        container_dict[short_id]["status"] = status
+    container_dict = {
+        c.short_id: {"name": c.name, "status": c.status}
+        for c in containers
+    }
 
     return container_dict
