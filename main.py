@@ -9,8 +9,9 @@ from utils import update_git, check_git
 __version__ = "0.1.0"
 
 @click.group()
-@version_option(version=__version__, prog_name="Whale Watch", message="%(prog)s version %(version)s", help="Show CLI version", short_name="v")
+@version_option(version=__version__, prog_name="Whale Watch", help="Shows version of Whale Watch CLI")
 def cli():
+    """ Whale Watch CLI """
     pass
 
 @cli.command()
