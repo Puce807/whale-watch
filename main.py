@@ -14,7 +14,7 @@ def update():
 @cli.command()
 def ls():
     for container, info in named_containers.items():
-        print(f"{named_containers}: Status {info["status"]} | ID {info["id"]}")
+        print(f"{container}: Status {info["status"]} | ID {info["id"]}")
 
 if __name__ == "__main__":
     if AUTO_GIT_PULL: update_git()
