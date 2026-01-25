@@ -38,29 +38,21 @@ def get_network_io(stats):
         tx_total += iface.get("tx_bytes", 0)
     return rx_total, tx_total
 
-def raw_container_stats(client):
-    container_names = list_containers(client).keys()
-    stat_dict = {}
-    for c_id in container_names:
-        container = client.containers.get(c_id)
-        stats = container.stats(stream=False)
-        stat_dict[c_id] = stats
-    return stat_dict
-
-def container_stats(client, status):
-    raw_dict = raw_container_stats(client)
+def container_stats(client, status="running"):
+    containers = client.containers.list(all=True)
     stat_dict = {}
 
-    for c_id, info in raw_dict.items():
-        container = client.containers.get(c_id)
-        if container.status != status or status == "all":
+    for container in containers:
+        if status != "all" and container.status != status:
             continue
 
-        cpu = calculate_cpu_percent(info)
-        memory = get_memory_usage(info)
-        network = get_network_io(info)
+        stats = container.stats(stream=False)
 
-        stat_dict[c_id] = {
+        cpu = calculate_cpu_percent(stats)
+        memory = get_memory_usage(stats)
+        network = get_network_io(stats)
+
+        stat_dict[container.short_id] = {
             "name": container.name,
             "cpu": cpu,
             "memory": memory,

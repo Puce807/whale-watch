@@ -4,8 +4,6 @@ from rich.table import Table
 from docker_cmds import *
 from utils import *
 
-__version__ = "0.2.0"
-
 @click.group()
 @click.pass_context
 def cli(ctx):
@@ -34,9 +32,10 @@ def version(git):
     """Displays version"""
     current_commit = get_local_commit()
     commit_msg = get_commit_message(current_commit)
-    print(f"Whale Watch Version {__version__}")
+    print(f"Whale Watch Version {VERSION}")
     if git:
-        print(f"Commit: {current_commit} Message: {commit_msg}")
+        print(f"Commit: {current_commit}")
+        print(f"Message: {commit_msg}")
 
 @cli.command()
 @click.option("-s", "--status", default="all",
@@ -84,10 +83,10 @@ def stats(status):
         cpu_color = "green" if cpu_percent < 40 else "yellow" if cpu_percent < 80 else "red"
         mem_color = "green" if ram_percent < 60 else "yellow" if cpu_percent < 80 else "red"
         cpu = f"[{cpu_color}]{round(cpu_percent, 2)}%[/{cpu_color}]"
-        mem_use = bytes_to_human(ram_usage)
-        mem_lim = bytes_to_human(ram_limit)
-        mem_percent = round(ram_percent, 2)
-        mem = f"[{mem_color}]{mem_use}/{mem_lim} ({mem_percent}%)[/{mem_color}]"
+        mem_use = f"[cyan]{bytes_to_human(ram_usage)}[/cyan]"
+        mem_lim = f"[white]{bytes_to_human(ram_limit)}[/white]"
+        mem_percent = f"[{mem_color}]round(ram_percent, 2)[/{mem_color}]"
+        mem = f"{mem_use}/{mem_lim} ({mem_percent}%)"
         net_d = bytes_to_human(net_down)
         net_u = bytes_to_human(net_up)
         net = f"{net_d} ˅ / {net_u} ˄"
