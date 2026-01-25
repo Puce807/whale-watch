@@ -9,9 +9,20 @@ from utils import *
 __version__ = "0.2.0"
 
 @click.group()
-def cli():
+@click.pass_context
+def cli(ctx):
     """ Whale Watch CLI """
-    pass
+    if ctx.invoked_subcommand == "update":
+        return
+
+    if AUTO_GIT_PULL:
+        if not check_git(): update_git()
+    elif PROMPT_UPDATES:
+        if not check_git():
+            print("Local repository outdated")
+            answer = input("Pull new commits from repository? [y, n] ")
+            if answer.lower() == "y":
+                update_git()
 
 @cli.command()
 def update():
@@ -53,21 +64,12 @@ def ls(status):
     else:
         print("No containers found")
 
-@click.command()
+@cli.command()
 def stats():
     """Get docker container stats"""
     print(container_stats(client))
 
 if __name__ == "__main__":
-    if AUTO_GIT_PULL:
-        if not check_git(): update_git()
-    elif PROMPT_UPDATES:
-        if not check_git():
-            print("Local repository outdated")
-            answer = input("Pull new commits from repository? [y, n] ")
-            if answer.lower() == "y":
-                update_git()
-
     try: client = docker.from_env()
     except:
         log("ERROR: Docker not found", 0)
