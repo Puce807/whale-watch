@@ -1,4 +1,3 @@
-import click
 import docker
 from docker_cmds import *
 from config import *
@@ -9,11 +8,8 @@ def cli():
     pass
 
 @cli.command()
-@click.option("--count", default=1, help="Number of greetings")
-@click.option("--name", prompt="Your name", help="The person to greet")
-def test(count, name):
-    for i in range(count):
-        print(f"Hello {name}")
+def ls():
+    print(list_containers(client))
 
 if __name__ == "__main__":
     if AUTO_GIT_PULL: update_git()
