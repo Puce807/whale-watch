@@ -25,6 +25,12 @@ def check_git():
     else:
         return False # New commits
 
-
 def update_git():
     subprocess.run(["git", "pull"], capture_output=True)
+
+def bytes_to_human(n_bytes):
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if n_bytes < 1024:
+            return f"{n_bytes:.1f}{unit}"
+        n_bytes /= 1024
+    return f"{n_bytes:.1f}PB"

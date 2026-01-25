@@ -38,13 +38,6 @@ def get_network_io(stats):
         tx_total += iface.get("tx_bytes", 0)
     return rx_total, tx_total
 
-def bytes_to_human(n_bytes) -> str:
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if n_bytes < 1024:
-            return f"{n_bytes:.1f}{unit}"
-        n_bytes /= 1024
-    return f"{n_bytes:.1f}PB"
-
 def raw_container_stats(client):
     container_names = list_containers(client).keys()
     stat_dict = {}
@@ -60,7 +53,7 @@ def container_stats(client, status):
 
     for c_id, info in raw_dict.items():
         container = client.containers.get(c_id)
-        if container.status != status:
+        if container.status != status or status == "all":
             continue
 
         cpu = calculate_cpu_percent(info)

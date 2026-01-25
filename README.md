@@ -1,4 +1,4 @@
-# Whale Watch
+# Whale Watch CLI
 
 A simple terminal-based docker compose manager.
 
