@@ -157,16 +157,15 @@ def scan_compose(console, start, targets):
                             last_render = now
 
                         if all(return_dict[t] for t in targets):
-                            live.update(
-                                print_scan(return_dict, entry.path, end=True,
-                                           files_scanned=files_scanned,
-                                           size_scanned=size_scanned,
-                                           files_per_sec=fps)
-                            )
-                            time.sleep(0.1)
+
                             return return_dict
 
             except (PermissionError, FileNotFoundError, OSError):
                 pass
-
+                live.update(
+                    print_scan(return_dict, entry.path, end=True,
+                files_scanned = files_scanned,
+                size_scanned = size_scanned,
+                files_per_sec = fps)
+                )
     return return_dict
