@@ -79,9 +79,9 @@ def print_scan(return_dict, scan_path, end,
 
     for target, path in return_dict.items():
         if path:
-            status = f"[green]✔ Found[/green] {shorten_path(path)}"
+            status = f"[green]Found[/green] {shorten_path(path)}"
         elif end:
-            status = "[red]✘ Not found[/red]"
+            status = "[red]Not found[/red]"
         else:
             status = f"[yellow]… scanning[/yellow] {scan_path}"
 
@@ -163,6 +163,7 @@ def scan_compose(console, start, targets):
                                            size_scanned=size_scanned,
                                            files_per_sec=fps)
                             )
+                            time.sleep(0.1)
                             return return_dict
 
             except (PermissionError, FileNotFoundError, OSError):
