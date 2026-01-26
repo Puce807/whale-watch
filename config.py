@@ -4,7 +4,9 @@ AUTO_GIT_PULL = False # Pull from the repository if there are new commits. NOTE:
 PROMPT_UPDATES = True # Prompt the user for new commits. Note: Has no effect if `AUTO_GIT_PULL` is True
 
 # --- Compose Scanning ---
-IGNORE_DIRECTORIES = ["photos", "media", "documents", "windows", "system volume information", "$recycle.bin", "venv", ".venv", "Application Data", "Local Settings", "Temporary Internet Files", "Local Settings"] # Directories to ignore in scan
+IGNORE_DIRECTORIES = ["photos", "media", "documents", "windows", "system volume information", "$recycle.bin", "venv",
+                      ".venv", "Application Data", "Local Settings", "Temporary Internet Files", "Local Settings",
+                      "backups", "node_modules", "cache"] # Directories to ignore in scan
 TARGET_FILE_TYPES = [".yml", ".yaml"] # Files types to target in scan, else will be ignored
 TARGET_FILES = ["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"] # Files to search for in scan
 SIZE_LIMIT = 1000000 # Size limit for checking compose files, in bytes

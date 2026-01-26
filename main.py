@@ -26,6 +26,7 @@ def update(git):
     """Pulls new commits from the repository"""
     update_git()
     log("Local repository updated successfully", 2)
+    log(f"Whale Watch Version {VERSION}", 2)
     if git:
         current_commit = get_local_commit()
         commit_msg = get_commit_message(current_commit)

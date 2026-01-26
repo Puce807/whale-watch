@@ -67,12 +67,14 @@ def scan_compose(start, targets):
     stack = [start]
     return_dict = {}
     for target in targets: return_dict[target] = None
+    f = 0
     while stack:
+        f += 1
         path = stack.pop()
         try:
             with os.scandir(path) as entries:
                 for entry in entries:
-                    log(entry.path, 2)
+                    if f % 10 == 0: log(entry.path, 2)
                     path_obj = Path(entry.path)
                     if entry.is_dir(follow_symlinks=False):
                         last_dir = path_obj.name
@@ -86,8 +88,10 @@ def scan_compose(start, targets):
                             continue
                         elif entry.name.lower() in TARGET_FILES and file_size(entry.path) <= SIZE_LIMIT:
                             for target in targets:
-                                if search_file(entry.path, target):
+                                if return_dict[target] is None and search_file(entry.path, target):
                                     return_dict[target] = entry.path
+                    if all(return_dict[t] is not None for t in targets):
+                        return return_dict
 
         except (PermissionError, FileNotFoundError, OSError):
             pass
