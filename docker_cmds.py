@@ -76,7 +76,7 @@ def scan_compose(start, targets):
                     path_obj = Path(entry.path)
                     if entry.is_dir(follow_symlinks=False):
                         last_dir = path_obj.name
-                        if last_dir not in IGNORE_DIRECTORIES:
+                        if last_dir.lower() not in IGNORE_DIRECTORIES:
                             stack.append(entry.path)
                         else:
                             continue
