@@ -1,5 +1,7 @@
 import click
-from utils import log
+import os
+from pathlib import Path
+from utils import log, file_size, search_file
 from config import *
 
 def list_containers(client):
@@ -60,3 +62,33 @@ def container_stats(client, status="running"):
         }
 
     return stat_dict
+
+def scan_compose(start, targets):
+    stack = [start]
+    return_dict = {}
+    for target in targets: return_dict[target] = None
+    while stack:
+        path = stack.pop()
+        try:
+            with os.scandir(path) as entries:
+                for entry in entries:
+                    path_obj = Path(entry.path)
+                    if entry.is_dir(follow_symlinks=False):
+                        last_dir = path_obj.name
+                        if last_dir not in IGNORE_DIRECTORIES:
+                            stack.append(entry.path)
+                        else:
+                            continue
+                    else:
+                        ext = path_obj.suffix.lower()
+                        if ext not in TARGET_FILE_TYPES:
+                            continue
+                        elif entry.name.lower() in TARGET_FILES and file_size(entry.path) <= SIZE_LIMIT:
+                            for target in targets:
+                                if search_file(entry.path, target):
+                                    return_dict[target] = entry.path
+
+        except (PermissionError, FileNotFoundError):
+            pass
+
+    return return_dict

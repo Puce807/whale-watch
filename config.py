@@ -3,6 +3,14 @@ DEBUG = 2 # 0 = No debug (essential messages only), 1 = Warning Messages, 2 = In
 AUTO_GIT_PULL = False # Pull from the repository if there are new commits. NOTE: May appear to slow down cli
 PROMPT_UPDATES = True # Prompt the user for new commits. Note: Has no effect if `AUTO_GIT_PULL` is True
 
+# --- Compose Scanning ---
+IGNORE_DIRECTORIES = ["photos", "media", "documents", "windows", "system volume information", "$recycle.bin", "venv", ".venv"] # Directories to ignore in scan
+TARGET_FILE_TYPES = [".yml", ".yaml"] # Files types to target in scan, else will be ignored
+TARGET_FILES = ["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"] # Files to search for in scan
+SIZE_LIMIT = 1000000 # Size limit for checking compose files, in bytes
+
+# --- Cosmetic ---
+
 STATUS_COLORS = {
     "running": "green",
     "exited": "red",
@@ -12,6 +20,9 @@ STATUS_COLORS = {
     "removing": "magenta",
     "dead": "grey50"
 }
+
+# --- No need to change ---
+
 CONTAINER_STATUS = ["all", "created", "restarting", "running", "removing", "paused", "exited", "dead"]
 
-VERSION = "0.2.6"
+VERSION = "0.3.0"

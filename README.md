@@ -5,6 +5,7 @@ A simple terminal-based docker compose manager.
 ## Features
 
 - List docker containers
+- Get container stats
 
 ## Installation
 Prerequisites:

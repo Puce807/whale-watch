@@ -1,3 +1,4 @@
+import os.path
 import subprocess
 from config import *
 
@@ -33,6 +34,22 @@ def check_git():
 
 def update_git():
     subprocess.run(["git", "pull"], capture_output=True)
+
+def search_file(file_path, search_str):
+    try:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                if search_str in line:
+                    return True
+        return False
+    except (PermissionError, FileNotFoundError):
+        return False
+
+def file_size(file):
+    try:
+        return os.path.getsize(file)
+    except (FileNotFoundError, PermissionError):
+        return None
 
 def bytes_to_human(n_bytes):
     for unit in ["B", "KB", "MB", "GB", "TB"]:

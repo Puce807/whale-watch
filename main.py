@@ -85,8 +85,8 @@ def stats(status):
         cpu = f"[{cpu_color}]{round(cpu_percent, 2)}%[/{cpu_color}]"
         mem_use = f"[cyan]{bytes_to_human(ram_usage)}[/cyan]"
         mem_lim = f"[white]{bytes_to_human(ram_limit)}[/white]"
-        mem_percent = f"[{mem_color}]round(ram_percent, 2)[/{mem_color}]"
-        mem = f"{mem_use}/{mem_lim} ({mem_percent}%)"
+        mem_percent = f"[{mem_color}]{round(ram_percent, 2)}%[/{mem_color}]"
+        mem = f"{mem_use}/{mem_lim} ({mem_percent})"
         net_d = bytes_to_human(net_down)
         net_u = bytes_to_human(net_up)
         net = f"{net_d} ˅ / {net_u} ˄"
@@ -96,6 +96,13 @@ def stats(status):
         console.print(table)
     else:
         print("No containers found")
+
+@click.command()
+def scan():
+    """Scan system for docker compose files"""
+    container_names = named_containers.keys()
+    compose_dict = scan_compose("C:/", container_names)
+    print(compose_dict)
 
 if __name__ == "__main__":
     try: client = docker.from_env()
