@@ -72,6 +72,7 @@ def scan_compose(start, targets):
         try:
             with os.scandir(path) as entries:
                 for entry in entries:
+                    log(entry.path, 2)
                     path_obj = Path(entry.path)
                     if entry.is_dir(follow_symlinks=False):
                         last_dir = path_obj.name
