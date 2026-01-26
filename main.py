@@ -108,8 +108,7 @@ def stats(status):
 def scan():
     """Scan system for docker compose files"""
     container_names = named_containers.keys()
-    compose_dict = scan_compose("E:/", container_names)
-    print(compose_dict)
+    compose_dict = scan_compose(console,"E:/", container_names)
 
 if __name__ == "__main__":
     try: client = docker.from_env()

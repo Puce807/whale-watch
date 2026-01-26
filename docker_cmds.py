@@ -4,6 +4,11 @@ from pathlib import Path
 from utils import log, file_size, search_file
 from config import *
 
+from rich.console import Console
+from rich.live import Live
+from rich.table import Table
+from rich.style import Style
+
 def list_containers(client):
     containers = client.containers.list(all=True)
     if not containers:
@@ -63,37 +68,55 @@ def container_stats(client, status="running"):
 
     return stat_dict
 
-def scan_compose(start, targets):
+def print_scan(return_dict, scan_path):
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("Target")
+    table.add_column("Status")
+
+    for target, path in return_dict.items():
+        if path is None:
+            status = f"[yellow]Scanning... {scan_path}[/yellow]"
+        else:
+            status = f"[green]Found! {path}[/green]"
+        table.add_row(target, status)
+    return table
+
+def scan_compose(console, start, targets):
     stack = [start]
     return_dict = {}
     for target in targets: return_dict[target] = None
     f = 0
-    while stack:
-        f += 1
-        path = stack.pop()
-        try:
-            with os.scandir(path) as entries:
-                for entry in entries:
-                    if f % 10 == 0: log(entry.path, 2)
-                    path_obj = Path(entry.path)
-                    if entry.is_dir(follow_symlinks=False):
-                        last_dir = path_obj.name
-                        if last_dir.lower() not in IGNORE_DIRECTORIES:
-                            stack.append(entry.path)
+    with Live(console=console, refresh_per_second=4) as live:
+        while stack:
+            f += 1
+            path = stack.pop()
+            try:
+                with os.scandir(path) as entries:
+                    for entry in entries:
+                        #if f % 10 == 0:
+                            #log(entry.path, 2)
+                        path_obj = Path(entry.path)
+                        if entry.is_dir(follow_symlinks=False):
+                            last_dir = path_obj.name
+                            if last_dir.lower() not in IGNORE_DIRECTORIES:
+                                stack.append(entry.path)
+                            else:
+                                continue
                         else:
-                            continue
-                    else:
-                        ext = path_obj.suffix.lower()
-                        if ext not in TARGET_FILE_TYPES:
-                            continue
-                        elif entry.name.lower() in TARGET_FILES and file_size(entry.path) <= SIZE_LIMIT:
-                            for target in targets:
-                                if return_dict[target] is None and search_file(entry.path, target):
-                                    return_dict[target] = entry.path
-                    if all(return_dict[t] is not None for t in targets):
-                        return return_dict
+                            ext = path_obj.suffix.lower()
+                            if ext not in TARGET_FILE_TYPES:
+                                continue
+                            elif entry.name.lower() in TARGET_FILES and file_size(entry.path) <= SIZE_LIMIT:
+                                for target in targets:
+                                    if return_dict[target] is None and search_file(entry.path, target):
+                                        return_dict[target] = entry.path
 
-        except (PermissionError, FileNotFoundError, OSError):
-            pass
+                        live.update(print_scan(return_dict, entry.path))
+
+                        if all(return_dict[t] is not None for t in targets):
+                            return return_dict
+
+            except (PermissionError, FileNotFoundError, OSError):
+                pass
 
     return return_dict
