@@ -67,6 +67,5 @@ def shorten_path(path: str, max_len: int = 60) -> str:
     display = f"{start}/{name}"
     if len(display) <= max_len:
         return display
-    # truncate only the parent directories
-    truncated_start = "…" + start[-(max_len - len(name) - 4):]  # 4 for / and …
+    truncated_start = "…" + start[-(max_len - len(name) - 4):]
     return f"{truncated_start}/{name}"
