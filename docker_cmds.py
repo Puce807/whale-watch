@@ -162,10 +162,10 @@ def scan_compose(console, start, targets):
 
             except (PermissionError, FileNotFoundError, OSError):
                 pass
-                live.update(
-                    print_scan(return_dict, entry.path, end=True,
-                files_scanned = files_scanned,
-                size_scanned = size_scanned,
-                files_per_sec = fps)
+    live.update(
+        print_scan(return_dict, entry.path, end=True,
+        files_scanned = files_scanned,
+        size_scanned = size_scanned,
+        files_per_sec = fps)
                 )
     return return_dict
