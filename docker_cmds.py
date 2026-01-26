@@ -89,7 +89,7 @@ def scan_compose(start, targets):
                                 if search_file(entry.path, target):
                                     return_dict[target] = entry.path
 
-        except (PermissionError, FileNotFoundError):
+        except (PermissionError, FileNotFoundError, OSError):
             pass
 
     return return_dict
