@@ -68,74 +68,101 @@ def container_stats(client, status="running"):
     return stat_dict
 
 
-def print_scan(return_dict, scan_path, end, files_scanned=0, size_scanned=0, files_per_sec=0):
+def print_scan(return_dict, scan_path, end,
+               files_scanned=0, size_scanned=0, files_per_sec=0):
+
     scan_path = shorten_path(scan_path)
 
-    table = Table(show_header=True, header_style="green", show_lines=False)
-    table.add_column("Target")
-    table.add_column("Status")
+    table = Table(show_header=True, header_style="bold green", expand=True)
+    table.add_column("Target", style="cyan", no_wrap=True)
+    table.add_column("Status", style="white")
 
     for target, path in return_dict.items():
-        if path is None:
-            status = f"[yellow]Scanning... {scan_path}[/yellow]"
+        if path:
+            status = f"[green]✔ Found[/green] {shorten_path(path)}"
+        elif end:
+            status = "[red]✘ Not found[/red]"
         else:
-            status = f"[green]Found! {path}[/green]"
-        if end and path is None:
-            status = f"[red]Not found[/red]"
+            status = f"[yellow]… scanning[/yellow] {scan_path}"
+
         table.add_row(target, status)
 
-    progress_text = f"[cyan]{files_scanned} files[/cyan] • " \
-                    f"[magenta]{size_scanned / 1e6:.2f} MB[/magenta] • " \
-                    f"[green]{files_per_sec:.1f} f/s[/green]"
+    stats = (
+        f"[green]{files_scanned:,}[/green] files • "
+        f"[green]{size_scanned / 1e6:,.1f} MB[/green] • "
+        f"[green]{files_per_sec:,.0f} f/s[/green]"
+    )
 
-    panel = Panel.fit(table, title=progress_text, border_style="bright_blue")
+    return Panel(
+        table,
+        title=stats,
+        border_style="green",
+        padding=(1, 2),
+    )
 
-    return panel
 
 def scan_compose(console, start, targets):
     stack = [start]
-    return_dict = {}
-    for target in targets: return_dict[target] = None
-    f = 0
+    return_dict: dict[str, str | None] = {t: None for t in targets}
+
     files_scanned = 0
     size_scanned = 0
     start_time = time.time()
-    with Live(console=console, refresh_per_second=4) as live:
+    last_render = 0
+
+    with Live(console=console, refresh_per_second=12) as live:
         while stack:
-            f += 1
             path = stack.pop()
             try:
                 with os.scandir(path) as entries:
                     for entry in entries:
                         files_scanned += 1
-                        size_scanned = file_size(entry.path)
-                        elapsed = max(time.time() - start_time, 0.01)
-                        files_per_sec = int(files_scanned / elapsed)
-                        #if f % 10 == 0:
-                            #log(entry.path, 2)
+                        try:
+                            size_scanned += entry.stat(follow_symlinks=False).st_size
+                        except OSError:
+                            pass
+
+                        # ---- scanning logic ----
                         path_obj = Path(entry.path)
                         if entry.is_dir(follow_symlinks=False):
-                            last_dir = path_obj.name
-                            if last_dir.lower() not in IGNORE_DIRECTORIES:
+                            if path_obj.name.lower() not in IGNORE_DIRECTORIES:
                                 stack.append(entry.path)
-                            else:
-                                continue
-                        else:
-                            ext = path_obj.suffix.lower()
-                            if ext not in TARGET_FILE_TYPES:
-                                continue
-                            elif entry.name.lower() in TARGET_FILES and file_size(entry.path) <= SIZE_LIMIT:
-                                for target in targets:
-                                    if return_dict[target] is None and search_file(entry.path, target):
-                                        return_dict[target] = entry.path
+                            continue
 
-                        live.update(print_scan(return_dict, entry.path, end=False,
-                                               files_scanned=files_scanned,
-                                               size_scanned=size_scanned,
-                                               files_per_sec=files_per_sec))
+                        if (
+                            path_obj.suffix.lower() in TARGET_FILE_TYPES
+                            and entry.name.lower() in TARGET_FILES
+                            and file_size(entry.path) <= SIZE_LIMIT
+                        ):
+                            for target in targets:
+                                if return_dict[target] is None and search_file(entry.path, target):
+                                    return_dict[target] = entry.path
 
-                        if all(return_dict[t] is not None for t in targets):
-                            live.update(print_scan(return_dict, entry.path, True))
+                        # ---- UI THROTTLE ----
+                        now = time.time()
+                        if now - last_render > 0.1:  # 🔥 100ms
+                            elapsed = max(now - start_time, 0.01)
+                            fps = int(files_scanned / elapsed)
+
+                            live.update(
+                                print_scan(
+                                    return_dict,
+                                    entry.path,
+                                    end=False,
+                                    files_scanned=files_scanned,
+                                    size_scanned=size_scanned,
+                                    files_per_sec=fps,
+                                )
+                            )
+                            last_render = now
+
+                        if all(return_dict[t] for t in targets):
+                            live.update(
+                                print_scan(return_dict, entry.path, end=True,
+                                           files_scanned=files_scanned,
+                                           size_scanned=size_scanned,
+                                           files_per_sec=fps)
+                            )
                             return return_dict
 
             except (PermissionError, FileNotFoundError, OSError):
