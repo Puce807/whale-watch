@@ -71,7 +71,7 @@ def container_stats(client, status="running"):
 def print_scan(return_dict, scan_path, end, files_scanned=0, size_scanned=0, files_per_sec=0):
     scan_path = shorten_path(scan_path)
 
-    table = Table(show_header=True, header_style="bold magenta")
+    table = Table(show_header=True, header_style="green", show_lines=False)
     table.add_column("Target")
     table.add_column("Status")
 
