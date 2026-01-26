@@ -21,10 +21,16 @@ def cli(ctx):
                 update_git()
 
 @cli.command()
-def update():
+@click.option("-g", "--git", is_flag=True, help="Include git info")
+def update(git):
     """Pulls new commits from the repository"""
     update_git()
     log("Local repository updated successfully", 2)
+    if git:
+        current_commit = get_local_commit()
+        commit_msg = get_commit_message(current_commit)
+        print(f"Commit: {current_commit}")
+        print(f"Message: {commit_msg}")
 
 @cli.command(name="version")
 @click.option("-g", "--git", is_flag=True, help="Include git info")
@@ -97,7 +103,7 @@ def stats(status):
     else:
         print("No containers found")
 
-@click.command()
+@cli.command()
 def scan():
     """Scan system for docker compose files"""
     container_names = named_containers.keys()
