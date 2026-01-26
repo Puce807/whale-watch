@@ -109,10 +109,12 @@ def scan_compose(console, start, targets):
     size_scanned = 0
     start_time = time.time()
     last_render = 0
+    last_path = start
 
     with Live(console=console, refresh_per_second=12) as live:
         while stack:
             path = stack.pop()
+            last_path = path
             try:
                 with os.scandir(path) as entries:
                     for entry in entries:
@@ -122,9 +124,7 @@ def scan_compose(console, start, targets):
                         except OSError:
                             pass
 
-                        # ---- scanning logic ----
                         path_obj = Path(entry.path)
-                        last_path = entry.path
                         if entry.is_dir(follow_symlinks=False):
                             if path_obj.name.lower() not in IGNORE_DIRECTORIES:
                                 stack.append(entry.path)
@@ -139,16 +139,15 @@ def scan_compose(console, start, targets):
                                 if return_dict[target] is None and search_file(entry.path, target):
                                     return_dict[target] = entry.path
 
-                        # ---- UI THROTTLE ----
                         now = time.time()
-                        if now - last_render > 0.1:  # 🔥 100ms
+                        if now - last_render > 0.1:
                             elapsed = max(now - start_time, 0.01)
                             fps = int(files_scanned / elapsed)
 
                             live.update(
                                 print_scan(
                                     return_dict,
-                                    entry.path,
+                                    last_path,
                                     end=False,
                                     files_scanned=files_scanned,
                                     size_scanned=size_scanned,
@@ -157,23 +156,20 @@ def scan_compose(console, start, targets):
                             )
                             last_render = now
 
-                        if all(return_dict[t] for t in targets):
-
-                            return return_dict
-
             except (PermissionError, FileNotFoundError, OSError):
                 pass
-    elapsed = max(time.time() - start_time, 0.01)
-    fps = int(files_scanned / elapsed)
-    live.update(
-        print_scan(
-            return_dict,
-            last_path,
-            end=True,
-            files_scanned=files_scanned,
-            size_scanned=size_scanned,
-            files_per_sec=fps,
+
+        elapsed = max(time.time() - start_time, 0.01)
+        fps = int(files_scanned / elapsed)
+        live.update(
+            print_scan(
+                return_dict,
+                last_path,
+                end=True,
+                files_scanned=files_scanned,
+                size_scanned=size_scanned,
+                files_per_sec=fps,
+            )
         )
-    )
-    time.sleep(0.1)
+        time.sleep(0.2)
     return return_dict
