@@ -1,13 +1,12 @@
-import click
 import os
+import time
 from pathlib import Path
-from utils import log, file_size, search_file
+from utils import log, file_size, search_file, shorten_path
 from config import *
-
-from rich.console import Console
+from rich.progress import Progress, BarColumn, TextColumn, TimeElapsedColumn
 from rich.live import Live
 from rich.table import Table
-from rich.style import Style
+from rich.panel import Panel
 
 def list_containers(client):
     containers = client.containers.list(all=True)
@@ -68,7 +67,10 @@ def container_stats(client, status="running"):
 
     return stat_dict
 
-def print_scan(return_dict, scan_path):
+
+def print_scan(return_dict, scan_path, end, files_scanned=0, size_scanned=0, files_per_sec=0):
+    scan_path = shorten_path(scan_path)
+
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Target")
     table.add_column("Status")
@@ -78,17 +80,33 @@ def print_scan(return_dict, scan_path):
             status = f"[yellow]Scanning... {scan_path}[/yellow]"
         else:
             status = f"[green]Found! {path}[/green]"
+        if end and path is None:
+            status = f"[red]Not found[/red]"
         table.add_row(target, status)
-    return table
+
+    progress_text = f"[cyan]{files_scanned} files[/cyan] • " \
+                    f"[magenta]{size_scanned / 1e6:.2f} MB[/magenta] • " \
+                    f"[green]{files_per_sec:.1f} f/s[/green]"
+
+    panel = Panel.fit(table, title=progress_text, border_style="bright_blue")
+
+    return panel
 
 def scan_compose(console, start, targets):
     stack = [start]
     return_dict = {}
     for target in targets: return_dict[target] = None
     f = 0
+    files_scanned = 0
+    size_scanned = 0
+    start_time = time.time()
     with Live(console=console, refresh_per_second=4) as live:
         while stack:
             f += 1
+            files_scanned += 1
+            size_scanned = file_size(entry.path)
+            elapsed = max(time.time() - start_time, 0.01)
+            files_per_sec = int(files_scanned / elapsed)
             path = stack.pop()
             try:
                 with os.scandir(path) as entries:
@@ -111,9 +129,13 @@ def scan_compose(console, start, targets):
                                     if return_dict[target] is None and search_file(entry.path, target):
                                         return_dict[target] = entry.path
 
-                        live.update(print_scan(return_dict, entry.path))
+                        live.update(print_scan(return_dict, entry.path, end=False,
+                                               files_scanned=files_scanned,
+                                               size_scanned=size_scanned,
+                                               files_per_sec=files_per_sec))
 
                         if all(return_dict[t] is not None for t in targets):
+                            live.update(print_scan(return_dict, entry.path, True))
                             return return_dict
 
             except (PermissionError, FileNotFoundError, OSError):

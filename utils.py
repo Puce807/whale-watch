@@ -57,3 +57,8 @@ def bytes_to_human(n_bytes):
             return f"{n_bytes:.1f}{unit}"
         n_bytes /= 1024
     return f"{n_bytes:.1f}PB"
+
+def shorten_path(path, max_len=60):
+    if len(path) <= max_len:
+        return path
+    return "…" + path[-max_len:]
