@@ -103,14 +103,14 @@ def scan_compose(console, start, targets):
     with Live(console=console, refresh_per_second=4) as live:
         while stack:
             f += 1
-            files_scanned += 1
-            size_scanned = file_size(entry.path)
-            elapsed = max(time.time() - start_time, 0.01)
-            files_per_sec = int(files_scanned / elapsed)
             path = stack.pop()
             try:
                 with os.scandir(path) as entries:
                     for entry in entries:
+                        files_scanned += 1
+                        size_scanned = file_size(entry.path)
+                        elapsed = max(time.time() - start_time, 0.01)
+                        files_per_sec = int(files_scanned / elapsed)
                         #if f % 10 == 0:
                             #log(entry.path, 2)
                         path_obj = Path(entry.path)
