@@ -1,5 +1,6 @@
 import os.path
 import subprocess
+from pathlib import Path
 from config import *
 
 def log(msg, tier):
@@ -58,7 +59,14 @@ def bytes_to_human(n_bytes):
         n_bytes /= 1024
     return f"{n_bytes:.1f}PB"
 
-def shorten_path(path, max_len=60):
-    if len(path) <= max_len:
-        return path
-    return "…" + path[-max_len:]
+
+def shorten_path(path: str, max_len: int = 60) -> str:
+    p = Path(path)
+    name = p.name
+    start = str(p.parent)
+    display = f"{start}/{name}"
+    if len(display) <= max_len:
+        return display
+    # truncate only the parent directories
+    truncated_start = "…" + start[-(max_len - len(name) - 4):]  # 4 for / and …
+    return f"{truncated_start}/{name}"
