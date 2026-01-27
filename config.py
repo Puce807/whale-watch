@@ -5,8 +5,8 @@ PROMPT_UPDATES = True # Prompt the user for new commits. Note: Has no effect if 
 
 # --- Compose Scanning ---
 IGNORE_DIRECTORIES = ["photos", "media", "documents", "windows", "system volume information", "$recycle.bin", "venv",
-                      ".venv", "Application Data", "Local Settings", "Temporary Internet Files", "Local Settings",
-                      "backups", "node_modules", "cache"] # Directories to ignore in scan
+                      ".venv", "application data", "local settings", "temporary internet files", "local settings",
+                      "backups", "node_modules", "cache", "temp"] # Directories to ignore in scan
 TARGET_FILE_TYPES = [".yml", ".yaml"] # Files types to target in scan, else will be ignored
 TARGET_FILES = ["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"] # Files to search for in scan
 SIZE_LIMIT = 1000000 # Size limit for checking compose files, in bytes

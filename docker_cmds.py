@@ -1,7 +1,7 @@
 import os
 import time
 from pathlib import Path
-from utils import log, file_size, search_file, shorten_path
+from utils import log, file_size, search_file, shorten_path, bytes_to_human
 from config import *
 from rich.progress import Progress, BarColumn, TextColumn, TimeElapsedColumn
 from rich.live import Live
@@ -90,10 +90,13 @@ def print_scan(return_dict, scan_path, end,
 
         table.add_row(target, status)
 
+    drive = Path(scan_path).anchor
+
     stats = (
         f"[green]{files_scanned:,}[/green] files • "
-        f"[green]{size_scanned / 1e6:,.1f} MB[/green] • "
-        f"[green]{files_per_sec:,.0f} f/s[/green]"
+        f"[green]{bytes_to_human(size_scanned)}[/green] • "
+        f"[green]{files_per_sec:,.0f} f/s[/green] • "
+        f"[green]{drive}[/green]"
     )
 
     return Panel(
@@ -106,6 +109,7 @@ def print_scan(return_dict, scan_path, end,
 def scan_compose(console, starts, targets):
     stack = [str(s) for s in starts]
 
+    targets = [t.lower() for t in targets]
     return_dict: dict[str, str | None] = {t: None for t in targets}
 
     files_scanned = 0
