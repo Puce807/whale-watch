@@ -73,8 +73,11 @@ def print_scan(return_dict, scan_path, end,
 
     scan_path = shorten_path(scan_path)
 
+    max_width = max(len(t) for t in return_dict.keys())
+    col_width = min(max_width, 20)  # max 20 chars, but smaller if targets are short
+
     table = Table(show_header=True, header_style="bold green", expand=True)
-    table.add_column("Target", style="cyan", no_wrap=True)
+    table.add_column("Target", style="cyan", no_wrap=True, width=col_width)
     table.add_column("Status", style="white")
 
     for target, path in return_dict.items():
@@ -100,16 +103,16 @@ def print_scan(return_dict, scan_path, end,
         padding=(1, 2),
     )
 
+def scan_compose(console, starts, targets):
+    stack = [str(s) for s in starts]
 
-def scan_compose(console, start, targets):
-    stack = [start]
     return_dict: dict[str, str | None] = {t: None for t in targets}
 
     files_scanned = 0
     size_scanned = 0
     start_time = time.time()
     last_render = 0
-    last_path = start
+    last_path = stack[0] if stack else ""
 
     with Live(console=console, refresh_per_second=12) as live:
         while stack:
@@ -125,6 +128,7 @@ def scan_compose(console, start, targets):
                             pass
 
                         path_obj = Path(entry.path)
+
                         if entry.is_dir(follow_symlinks=False):
                             if path_obj.name.lower() not in IGNORE_DIRECTORIES:
                                 stack.append(entry.path)
@@ -172,4 +176,6 @@ def scan_compose(console, start, targets):
             )
         )
         time.sleep(0.2)
+
     return return_dict
+

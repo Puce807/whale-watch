@@ -1,7 +1,6 @@
 import docker
 import click
 from rich.console import Console
-from rich.table import Table
 from docker_cmds import *
 from utils import *
 
@@ -106,10 +105,18 @@ def stats(status):
         print("No containers found")
 
 @cli.command()
-def scan():
+@click.option("-d", "--drive", default="all", type=click.Choice(build_drive_options()),
+              help="Select a specific drive to scan")
+def scan(drive):
     """Scan system for docker compose files"""
+    # TODO: Add Flags
+    # TODO: Add caching
+    if drive == "all":
+        drives = discover_drives()
+    else:
+        drives = [f"{drive}:\\"]
     container_names = named_containers.keys()
-    compose_dict = scan_compose(console,"E:/", container_names)
+    compose_dict = scan_compose(console, drives, container_names)
 
 if __name__ == "__main__":
     try: client = docker.from_env()

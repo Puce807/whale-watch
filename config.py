@@ -27,4 +27,4 @@ STATUS_COLORS = {
 
 CONTAINER_STATUS = ["all", "created", "restarting", "running", "removing", "paused", "exited", "dead"]
 
-VERSION = "0.3.4"
+VERSION = "0.3.5"

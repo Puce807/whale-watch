@@ -1,5 +1,8 @@
 import os.path
 import subprocess
+from dataclasses import replace
+
+import psutil
 from pathlib import Path
 from config import *
 
@@ -69,3 +72,18 @@ def shorten_path(path: str, max_len: int = 60) -> str:
         return display
     truncated_start = "…" + start[-(max_len - len(name) - 4):]
     return f"{truncated_start}/{name}"
+
+def discover_drives():
+    try:
+        partitions = psutil.disk_partitions(all=False)
+        drives = [p.device for p in partitions]
+        return drives
+    except Exception(FileNotFoundError, PermissionError, OSError) as e:
+        log(f"Error discovering drives: {e}", 1)
+        return []
+
+def build_drive_options():
+    drives = discover_drives()
+    drives = [d.replace("\\", "").replace(":", "") for d in drives]
+    drives.insert(0, "all")
+    return drives
