@@ -90,7 +90,7 @@ def print_scan(return_dict, scan_path, end,
 
         table.add_row(target, status)
 
-    drive = Path(scan_path).anchor
+    drive = str(Path(scan_path).drive)
 
     stats = (
         f"[green]{files_scanned:,}[/green] files • "
@@ -106,7 +106,7 @@ def print_scan(return_dict, scan_path, end,
         padding=(1, 2),
     )
 
-def scan_compose(console, starts, targets):
+def scan_compose(console, starts, targets, quiet=False):
     stack = [str(s) for s in starts]
 
     targets = [t.lower() for t in targets]
@@ -152,7 +152,7 @@ def scan_compose(console, starts, targets):
                             elapsed = max(now - start_time, 0.01)
                             fps = int(files_scanned / elapsed)
 
-                            live.update(
+                            if not quiet: live.update(
                                 print_scan(
                                     return_dict,
                                     last_path,
@@ -169,7 +169,7 @@ def scan_compose(console, starts, targets):
 
         elapsed = max(time.time() - start_time, 0.01)
         fps = int(files_scanned / elapsed)
-        live.update(
+        if not quiet: live.update(
             print_scan(
                 return_dict,
                 last_path,
