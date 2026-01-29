@@ -1,6 +1,7 @@
 import docker
 import click
 from rich.console import Console
+from pathlib import Path
 from docker_cmds import *
 from utils import *
 
@@ -121,9 +122,17 @@ def scan(drive, quiet, timeout):
         drives = [f"{drive}:\\"]
     container_names = named_containers.keys()
     if quiet:
-        compose_dict = scan_compose(console, drives, container_names, True, timeout)
+        compose_dict = scan_compose(console, drives, container_names, cache, True, timeout)
     else:
-        compose_dict = scan_compose(console, drives, container_names, timeout=timeout)
+        compose_dict = scan_compose(console, drives, container_names, cache, timeout=timeout)
+
+    to_write = {}
+    for name, path in compose_dict.items():
+        container_id = named_containers[name]["id"]
+        is_compose = path is not None
+        to_write[name] = {"id": container_id, "compose": is_compose, "compose_path": path}
+    cache_dict = cache | to_write
+    write_json(cache_dict, CACHE_PATH)
 
 if __name__ == "__main__":
     try: client = docker.from_env()
@@ -131,6 +140,12 @@ if __name__ == "__main__":
         log("ERROR: Docker not found", 0)
         client = ""
     console = Console()
+
+    if file_exists(CACHE_PATH):
+        cache = read_json(CACHE_PATH)
+    else:
+        log("Cache file not found, creating...", 2)
+        write_json({}, CACHE_PATH)
 
     id_containers = list_containers(client)
     named_containers = {info["name"]: {"id": c_id, "status": info["status"]} for c_id, info in id_containers.items()}

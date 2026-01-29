@@ -1,7 +1,7 @@
 import os
 import time
 from pathlib import Path
-from utils import log, file_size, search_file, shorten_path, bytes_to_human
+from utils import log, file_size, search_file, shorten_path, bytes_to_human, file_exists
 from config import *
 from rich.progress import Progress, BarColumn, TextColumn, TimeElapsedColumn
 from rich.live import Live
@@ -104,7 +104,7 @@ def print_scan(return_dict, scan_path, end,
         padding=(1, 2),
     )
 
-def scan_compose(console, starts, targets, quiet=False, timeout=60):
+def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
     stack = [str(s) for s in starts]
 
     targets = [t.lower() for t in targets]
@@ -116,8 +116,15 @@ def scan_compose(console, starts, targets, quiet=False, timeout=60):
     last_render = 0
     last_path = stack[0] if stack else ""
     found = 0
+    is_found = False
     orphans = []
     killed_by_timeout = False
+
+    for target in targets:
+        compose_path = cache.get(target, {}).get("compose_path")
+        if compose_path is not None:
+            if file_exists(compose_path):
+                return_dict[target] = compose_path
 
     with Live(console=console, refresh_per_second=12) as live:
         while stack:
@@ -148,8 +155,12 @@ def scan_compose(console, starts, targets, quiet=False, timeout=60):
                                 if return_dict[target] is None and search_file(entry.path, target):
                                     return_dict[target] = entry.path
                                     found += 1
-                                else:
-                                    orphans.append(entry.path)
+                                    is_found = True
+                            if is_found:
+                                is_found = False
+                            else:
+                                orphans.append(entry.path)
+
 
                         now = time.time()
                         if now - last_render > 0.1:
@@ -186,16 +197,17 @@ def scan_compose(console, starts, targets, quiet=False, timeout=60):
                 files_per_sec=fps,
             )
         )
-        print(f"Found the location of compose files for {found}/{len(targets)}")
-        if killed_by_timeout: print(f"Scan was ended by timeout ({timeout}). Scan may be incomplete, to try again use "
-                                    f"scan --timeout 120")
-        if found != len(targets): print(f"Warning: Not all docker containers found with valid compose file.")
-        if len(orphans) > 0:
-            print(f"Warning: Found {orphans} orphaned compose files at: ")
-            for path in orphans:
-                print(f"- {path}")
-
         time.sleep(0.2)
+
+    log(f"Found the location of compose files for {found}/{len(targets)}", 1)
+    if killed_by_timeout: log(f"Scan was ended by timeout ({timeout}). Scan may be incomplete, to try again use "
+                             f"scan --timeout 120", 1)
+    if found != len(targets):
+        log(f"Warning: Not all docker containers found with valid compose file.", 1)
+    if len(orphans) > 0:
+        log(f"Warning: Found {orphans} orphaned compose files at: ", 1)
+        for path in orphans:
+            log(f"- {path}", 1)
 
     return return_dict
 

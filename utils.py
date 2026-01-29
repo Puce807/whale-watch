@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-from dataclasses import replace
+import json
 
 import psutil
 from pathlib import Path
@@ -40,7 +40,7 @@ def check_git():
 def update_git():
     result = subprocess.run(["git", "pull"], capture_output=True)
     if "Already up to date" not in result:
-        restart_program()
+        log("Run script again for update to take affect", 1)
 
 def search_file(file_path, search_str):
     try:
@@ -91,5 +91,21 @@ def build_drive_options():
     drives.insert(0, "all")
     return drives
 
-def restart_program():
-    os.execv(sys.executable, [sys.executable] + sys.argv)
+def write_json(msg, filepath):
+    json_str = json.dumps(msg, indent=4)
+    try:
+        with open(filepath, "w") as f:
+            f.write(json_str)
+    except PermissionError:
+        log("Error: Permission error when writing to file", 1)
+
+def read_json(filepath):
+    try:
+        with open(filepath, "r") as f:
+            data = json.load(f)
+        return data
+    except (FileNotFoundError, PermissionError):
+        log("Error: File not found", 1)
+
+def file_exists(filepath):
+    return Path(CACHE_PATH).exists()
