@@ -38,7 +38,7 @@ def check_git():
         return False # New commits
 
 def update_git():
-    result = subprocess.run(["git", "pull"], capture_output=True)
+    result = subprocess.run(["git", "pull"], capture_output=True, text=True)
     if "Already up to date" not in result:
         log("Run script again for update to take affect", 1)
 
