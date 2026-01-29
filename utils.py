@@ -1,4 +1,5 @@
-import os.path
+import os
+import sys
 import subprocess
 from dataclasses import replace
 
@@ -17,7 +18,7 @@ def get_commit_message(commit):
         text=True,
         check=True
     )
-    return result.stdout.strip()  # remove newlines
+    return result.stdout.strip()
 
 def get_local_commit():
     result = subprocess.run(["git", "rev-parse", "HEAD"],
@@ -37,7 +38,9 @@ def check_git():
         return False # New commits
 
 def update_git():
-    subprocess.run(["git", "pull"], capture_output=True)
+    result = subprocess.run(["git", "pull"], capture_output=True)
+    if "Already up to date" not in result:
+        restart_program()
 
 def search_file(file_path, search_str):
     try:
@@ -87,3 +90,6 @@ def build_drive_options():
     drives = [d.replace("\\", "").replace(":", "") for d in drives]
     drives.insert(0, "all")
     return drives
+
+def restart_program():
+    os.execv(sys.executable, [sys.executable] + sys.argv)
