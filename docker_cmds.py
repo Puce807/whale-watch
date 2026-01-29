@@ -125,6 +125,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
         if compose_path is not None:
             if file_exists(compose_path):
                 return_dict[target] = compose_path
+                found += 1
 
     with Live(console=console, refresh_per_second=12) as live:
         while stack:
@@ -158,7 +159,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
                                     is_found = True
                             if is_found:
                                 is_found = False
-                            else:
+                            elif entry.path not in return_dict.values():
                                 orphans.append(entry.path)
 
 
