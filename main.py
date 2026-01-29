@@ -13,10 +13,12 @@ def cli(ctx):
         return
 
     if AUTO_GIT_PULL:
-        if not check_git(): update_git()
+        if not check_git():
+            update_git()
+            log("Local repository updated, will take affect upon next run", 1)
     elif PROMPT_UPDATES:
         if not check_git():
-            print("Local repository outdated")
+            log("Local repository outdated", 0)
             answer = input("Pull new commits from repository? [y, n] ")
             if answer.lower() == "y":
                 update_git()
