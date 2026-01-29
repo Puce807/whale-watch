@@ -90,13 +90,11 @@ def print_scan(return_dict, scan_path, end,
 
         table.add_row(target, status)
 
-    drive = str(Path(scan_path).drive)
 
     stats = (
         f"[green]{files_scanned:,}[/green] files • "
         f"[green]{bytes_to_human(size_scanned)}[/green] • "
         f"[green]{files_per_sec:,.0f} f/s[/green] • "
-        f"[green]{drive}[/green]"
     )
 
     return Panel(
@@ -106,7 +104,7 @@ def print_scan(return_dict, scan_path, end,
         padding=(1, 2),
     )
 
-def scan_compose(console, starts, targets, quiet=False):
+def scan_compose(console, starts, targets, quiet=False, timeout=60):
     stack = [str(s) for s in starts]
 
     targets = [t.lower() for t in targets]
@@ -117,6 +115,8 @@ def scan_compose(console, starts, targets, quiet=False):
     start_time = time.time()
     last_render = 0
     last_path = stack[0] if stack else ""
+    found = 0
+    killed_by_timeout = False
 
     with Live(console=console, refresh_per_second=12) as live:
         while stack:
@@ -146,11 +146,15 @@ def scan_compose(console, starts, targets, quiet=False):
                             for target in targets:
                                 if return_dict[target] is None and search_file(entry.path, target):
                                     return_dict[target] = entry.path
+                                    found += 1
 
                         now = time.time()
                         if now - last_render > 0.1:
                             elapsed = max(now - start_time, 0.01)
                             fps = int(files_scanned / elapsed)
+                            if elapsed > timeout or timeout == 0:
+                                killed_by_timeout = True
+                                break
 
                             if not quiet: live.update(
                                 print_scan(
@@ -179,6 +183,9 @@ def scan_compose(console, starts, targets, quiet=False):
                 files_per_sec=fps,
             )
         )
+        print(f"Found the location of compose files for {found}/{targets}")
+        if killed_by_timeout: print(f"Scan was ended by timeout ({timeout}). Scan may be incomplete, to try again use "
+                                    f"scan --timeout 120")
         time.sleep(0.2)
 
     return return_dict

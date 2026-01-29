@@ -108,8 +108,10 @@ def stats(status):
 @click.option("-d", "--drive", default="all", type=click.Choice(build_drive_options()),
               help="Select a specific drive to scan")
 @click.option("-q", "--quiet", default=False, is_flag=True,
-              help="Select a specific drive to scan")
-def scan(drive, quiet):
+              help="Only print summary")
+@click.option("-t", "--timeout", default="60", type=click.IntRange(0, 600),
+              help="Timeout in seconds, 0 = No timeout")
+def scan(drive, quiet, timeout):
     """Scan system for docker compose files"""
     # TODO: Add Flags
     # TODO: Add caching
@@ -119,9 +121,9 @@ def scan(drive, quiet):
         drives = [f"{drive}:\\"]
     container_names = named_containers.keys()
     if quiet:
-        compose_dict = scan_compose(console, drives, container_names, True)
+        compose_dict = scan_compose(console, drives, container_names, True, timeout)
     else:
-        compose_dict = scan_compose(console, drives, container_names)
+        compose_dict = scan_compose(console, drives, container_names, timeout=timeout)
 
 if __name__ == "__main__":
     try: client = docker.from_env()
