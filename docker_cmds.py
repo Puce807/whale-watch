@@ -116,6 +116,7 @@ def scan_compose(console, starts, targets, quiet=False, timeout=60):
     last_render = 0
     last_path = stack[0] if stack else ""
     found = 0
+    orphans = []
     killed_by_timeout = False
 
     with Live(console=console, refresh_per_second=12) as live:
@@ -147,12 +148,14 @@ def scan_compose(console, starts, targets, quiet=False, timeout=60):
                                 if return_dict[target] is None and search_file(entry.path, target):
                                     return_dict[target] = entry.path
                                     found += 1
+                                else:
+                                    orphans.append(entry.path)
 
                         now = time.time()
                         if now - last_render > 0.1:
                             elapsed = max(now - start_time, 0.01)
                             fps = int(files_scanned / elapsed)
-                            if elapsed > timeout or timeout == 0:
+                            if elapsed > timeout != 0:
                                 killed_by_timeout = True
                                 break
 
@@ -183,9 +186,15 @@ def scan_compose(console, starts, targets, quiet=False, timeout=60):
                 files_per_sec=fps,
             )
         )
-        print(f"Found the location of compose files for {found}/{targets}")
+        print(f"Found the location of compose files for {found}/{len(targets)}")
         if killed_by_timeout: print(f"Scan was ended by timeout ({timeout}). Scan may be incomplete, to try again use "
                                     f"scan --timeout 120")
+        if found != len(targets): print(f"Warning: Not all docker containers found with valid compose file.")
+        if len(orphans) > 0:
+            print(f"Warning: Found {orphans} orphaned compose files at: ")
+            for path in orphans:
+                print(f"- {path}")
+
         time.sleep(0.2)
 
     return return_dict
