@@ -111,7 +111,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
     target_alias = {}
     for target in targets:
         service = cache.get(target, {}).get("service")
-        if service is not None:
+        if service is not None and service not in GENERIC_SERVICE_NAMES:
             target_alias[target] = service
     print(target_alias)
 

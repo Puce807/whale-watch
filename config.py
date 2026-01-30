@@ -10,6 +10,9 @@ IGNORE_DIRECTORIES = ["photos", "media", "documents", "windows", "system volume 
 TARGET_FILE_TYPES = [".yml", ".yaml"] # Files types to target in scan, else will be ignored
 TARGET_FILES = ["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"] # Files to search for in scan
 SIZE_LIMIT = 1000000 # Size limit for checking compose files, in bytes
+GENERIC_SERVICE_NAMES = ["app", "db", "database", "postgres", "mysql",
+                         "redis", "backend", "frontend", "api", "web"] # Generic service names to ignore to reduce false positives
+
 
 # --- Cosmetic ---
 
