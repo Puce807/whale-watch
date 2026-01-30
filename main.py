@@ -148,13 +148,15 @@ if __name__ == "__main__":
     else:
         cache = {}
         write_json({}, CACHE_PATH)
-    print(f"Initial Cache: {cache}")
 
     id_containers = list_containers(client)
     named_containers = {info["name"]: {"id": c_id, "status": info["status"], "service": info["service"]} for c_id, info in id_containers.items()}
-    new_cache = cache | named_containers
-    cache.update(new_cache)
-    write_json(new_cache, CACHE_PATH)
-    print(f"New Cache: {new_cache}")
+    for name, live_data in named_containers.items():
+        existing = cache.get(name, {})
+        cache[name] = {
+            **existing,
+            **live_data,
+        }
+    write_json(cache, CACHE_PATH)
 
     cli()
