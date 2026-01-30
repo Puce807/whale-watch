@@ -128,6 +128,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
     for target in targets:
         compose_path = cache.get(target, {}).get("compose_path")
         if compose_path is not None:
+            print(f"{target}: {compose_path}")
             if file_exists(compose_path):
                 return_dict[target] = compose_path
                 found += 1
