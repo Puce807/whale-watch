@@ -15,7 +15,7 @@ def list_containers(client):
         return {}
 
     container_dict = {
-        c.short_id: {"name": c.name, "status": c.status}
+        c.short_id: {"name": c.name, "status": c.status, "service":c.labels.get("com.docker.compose.service")}
         for c in containers
     }
 
@@ -67,7 +67,6 @@ def container_stats(client, status="running"):
 
     return stat_dict
 
-
 def print_scan(return_dict, scan_path, end,
                files_scanned=0, size_scanned=0, files_per_sec=0):
 
@@ -109,6 +108,12 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
 
     targets = [t.lower() for t in targets]
     return_dict: dict[str, str | None] = {t: None for t in targets}
+    target_alias = {}
+    for target in targets:
+        service = cache[target].get("service")
+        if service is not None:
+            target_alias[target] = service
+    print(target_alias)
 
     files_scanned = 0
     size_scanned = 0
@@ -153,10 +158,17 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
                             and file_size(entry.path) <= SIZE_LIMIT
                         ):
                             for target in targets:
-                                if return_dict[target] is None and search_file(entry.path, target):
-                                    return_dict[target] = entry.path
-                                    found += 1
-                                    is_found = True
+                                alias = target_alias.get(target)
+                                if return_dict[target] is None:
+                                    if search_file(entry.path, target):
+                                        return_dict[target] = entry.path
+                                        found += 1
+                                        is_found = True
+                                    if alias is not None and search_file(entry.path, alias):
+                                        return_dict[target] = entry.path
+                                        found += 1
+                                        is_found = True
+
                             if is_found:
                                 is_found = False
                             elif entry.path not in return_dict.values():

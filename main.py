@@ -146,10 +146,13 @@ if __name__ == "__main__":
     if file_exists(CACHE_PATH):
         cache = read_json(CACHE_PATH)
     else:
-        log("Cache file not found, creating...", 2)
+        cache = {}
         write_json({}, CACHE_PATH)
 
     id_containers = list_containers(client)
-    named_containers = {info["name"]: {"id": c_id, "status": info["status"]} for c_id, info in id_containers.items()}
+    named_containers = {info["name"]: {"id": c_id, "status": info["status"], "service": info["service"]} for c_id, info in id_containers.items()}
+    new_cache = cache | named_containers
+    cache.update(new_cache)
+    write_json(new_cache, CACHE_PATH)
 
     cli()
