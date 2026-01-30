@@ -108,6 +108,7 @@ def mark_complete(target, path, found, return_dict):
     return found +1, True
 
 def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
+    # TODO: Add flags, including one to add debug to show source
     stack = [str(s) for s in starts]
 
     targets = [t.lower() for t in targets]
@@ -146,6 +147,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
             try:
                 with os.scandir(path) as entries:
                     for entry in entries:
+
                         files_scanned += 1
                         try:
                             size_scanned += entry.stat(follow_symlinks=False).st_size
@@ -204,6 +206,10 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
                                 )
                             )
                             last_render = now
+
+                        if found == len(targets):
+                            # TODO: Make a flag to bypass this
+                            break
 
             except (PermissionError, FileNotFoundError, OSError):
                 pass
