@@ -110,7 +110,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
     return_dict: dict[str, str | None] = {t: None for t in targets}
     target_alias = {}
     for target in targets:
-        service = cache[target].get("service")
+        service = cache.get(target, {}).get("service")
         if service is not None:
             target_alias[target] = service
     print(target_alias)
@@ -164,7 +164,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
                                         return_dict[target] = entry.path
                                         found += 1
                                         is_found = True
-                                    if alias is not None and search_file(entry.path, alias):
+                                    elif alias is not None and search_file(entry.path, alias):
                                         return_dict[target] = entry.path
                                         found += 1
                                         is_found = True
@@ -218,7 +218,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
     if found != len(targets):
         log(f"Warning: Not all docker containers found with valid compose file.", 1)
     if len(orphans) > 0:
-        log(f"Warning: Found {orphans} orphaned compose files at: ", 1)
+        log(f"Warning: Found {len(orphans)} orphaned compose files at: ", 1)
         for path in orphans:
             log(f"- {path}", 1)
 
