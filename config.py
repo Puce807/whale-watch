@@ -32,4 +32,4 @@ CONTAINER_STATUS = ["all", "created", "restarting", "running", "removing", "paus
 
 CACHE_PATH = "cache.json"
 
-VERSION = "0.3.61"
+VERSION = "0.3.67"

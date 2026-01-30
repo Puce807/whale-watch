@@ -150,7 +150,7 @@ if __name__ == "__main__":
         write_json({}, CACHE_PATH)
 
     id_containers = list_containers(client)
-    named_containers = {info["name"]: {"id": c_id, "status": info["status"], "service": info["service"]} for c_id, info in id_containers.items()}
+    named_containers = {info["name"]: {"id": c_id, "status": info["status"], "service": info["service"], "project": info["project"]} for c_id, info in id_containers.items()}
     for name, live_data in named_containers.items():
         existing = cache.get(name, {})
         cache[name] = {

@@ -107,3 +107,14 @@ def read_json(filepath):
 
 def file_exists(filepath):
     return Path(CACHE_PATH).exists()
+
+def get_parent_dir(filepath):
+    return Path(filepath).parts[1]
+
+def sanitize_container(name):
+    name = name.lower()
+    if "-" in name:
+        return name.split("-")[0]
+    elif "_" in name:
+        return name.split("_")[0]
+    return name

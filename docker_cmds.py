@@ -1,7 +1,7 @@
 import os
 import time
 from pathlib import Path
-from utils import log, file_size, search_file, shorten_path, bytes_to_human, file_exists
+from utils import *
 from config import *
 from rich.progress import Progress, BarColumn, TextColumn, TimeElapsedColumn
 from rich.live import Live
@@ -15,7 +15,7 @@ def list_containers(client):
         return {}
 
     container_dict = {
-        c.short_id: {"name": c.name, "status": c.status, "service":c.labels.get("com.docker.compose.service")}
+        c.short_id: {"name": c.name, "status": c.status, "service":c.labels.get("com.docker.compose.service"), "project":c.labels.get("com.docker.compose.project")}
         for c in containers
     }
 
@@ -103,16 +103,24 @@ def print_scan(return_dict, scan_path, end,
         padding=(1, 2),
     )
 
+def mark_complete(target, path, found, return_dict):
+    return_dict[target] = path
+    return found +1, True
+
 def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
     stack = [str(s) for s in starts]
 
     targets = [t.lower() for t in targets]
     return_dict: dict[str, str | None] = {t: None for t in targets}
     target_alias = {}
+    projects = {}
     for target in targets:
         service = cache.get(target, {}).get("service")
         if service is not None and service not in GENERIC_SERVICE_NAMES:
             target_alias[target] = service
+        project = cache.get(target, {}).get("project")
+        if project is not None:
+            projects[target] = sanitize_container(project)
 
     files_scanned = 0
     size_scanned = 0
@@ -157,16 +165,19 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
                             and file_size(entry.path) <= SIZE_LIMIT
                         ):
                             for target in targets:
+                                candidates = [target]
                                 alias = target_alias.get(target)
+                                project = projects.get(target)
+                                if alias and alias not in GENERIC_SERVICE_NAMES: candidates.append(alias)
+                                if project and project not in GENERIC_SERVICE_NAMES: candidates.append(project)
                                 if return_dict[target] is None:
-                                    if search_file(entry.path, target):
-                                        return_dict[target] = entry.path
-                                        found += 1
-                                        is_found = True
-                                    elif alias is not None and search_file(entry.path, alias):
-                                        return_dict[target] = entry.path
-                                        found += 1
-                                        is_found = True
+                                    for candidate in candidates:
+                                        if search_file(entry.path, candidate):
+                                            found, is_found = mark_complete(target, entry.path, found, return_dict)
+                                            break
+                                        if candidate == project and get_parent_dir(entry.path) == project:
+                                            found, is_found = mark_complete(target, entry.path, found, return_dict)
+                                            break
 
                             if is_found:
                                 is_found = False
