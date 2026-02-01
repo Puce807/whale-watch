@@ -118,7 +118,7 @@ def stats(status):
               help="Ignore existing cache")
 @click.option("-n", "--no-cache", default=False, is_flag=True,
               help="Do not save results to cache")
-@click.option("-a", "--all", default=False, is_flag=True,
+@click.option("-a", "--all", "scan_all", default=False, is_flag=True,
               help="Scan every directory included ignored")
 @click.option("-j", "--json", default=False, is_flag=True,
               help="Prints result as JSON")
