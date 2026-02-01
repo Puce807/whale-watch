@@ -120,7 +120,7 @@ def stats(status):
               help="Do not save results to cache")
 @click.option("-a", "--all", "scan_all", default=False, is_flag=True,
               help="Scan every directory included ignored")
-@click.option("-j", "--json", "output_json", default=False, is_flag=True,
+@click.option("-j", "--json", "print_json", default=False, is_flag=True,
               help="Prints result as JSON")
 @click.option("-R", "--roots", default=[], multiple=True,
               help="Root directories to scan")
