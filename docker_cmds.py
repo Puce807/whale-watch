@@ -228,7 +228,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
         )
         time.sleep(0.2)
 
-    log(f"Found the location of compose files for {found}/{len(targets)}", 1)
+    log(f"Found the location of compose files for {found}/{len(targets)} containers", 1)
     if killed_by_timeout: log(f"Scan was ended by timeout ({timeout}). Scan may be incomplete, to try again use "
                              f"scan --timeout 120", 1)
     if found != len(targets):
@@ -237,6 +237,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
         log(f"Warning: Found {len(orphans)} orphaned compose files at: ", 1)
         for path in orphans:
             log(f"- {path}", 1)
+    print(cache)
 
     return return_dict
 
