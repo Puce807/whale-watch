@@ -32,4 +32,6 @@ CONTAINER_STATUS = ["all", "created", "restarting", "running", "removing", "paus
 
 CACHE_PATH = "cache.json"
 
-VERSION = "0.3.67"
+CMD_NAME = "ww" # If you would like to change the command used to access whale watch, this must be changed before install.py is run
+
+VERSION = "0.3.7"

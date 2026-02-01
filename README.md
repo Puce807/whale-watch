@@ -32,12 +32,11 @@ Prerequisites:
     > venv\Scripts\activate.bat
     > ```
 
-4. Install dependencies
+4. Run install script and follow the instructions
     ```
-   pip install -r requirements.txt
+   python install.py
    ```
-
-5. Run script
+5. All Done!
     ```
-   python main.py 
+   ww version
    ```
