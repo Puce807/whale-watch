@@ -7,6 +7,8 @@ import psutil
 from pathlib import Path
 from config import *
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def log(msg, tier):
     if DEBUG >= tier:
         print(msg)
@@ -16,21 +18,22 @@ def get_commit_message(commit):
         ["git", "log", "--format=%B", "-n", "1", commit],
         capture_output=True,
         text=True,
-        check=True
+        check=True,
+        cwd=BASE_DIR
     )
     return result.stdout.strip()
 
 def get_local_commit():
     result = subprocess.run(["git", "rev-parse", "HEAD"],
                             capture_output=True,
-                            text=True, check=True, )
+                            text=True, check=True, cwd=BASE_DIR)
     return result.stdout.strip()
 
 def check_git():
     local_commit = get_local_commit()
     result = subprocess.run(["git", "ls-remote", "origin", "HEAD"],
                             capture_output=True,
-                            text=True, check=True)
+                            text=True, check=True, cwd=BASE_DIR)
     repo_commit = result.stdout.split()[0]
     if local_commit == repo_commit:
         return True # Up-to-date
@@ -38,7 +41,7 @@ def check_git():
         return False # New commits
 
 def update_git():
-    subprocess.run(["git", "pull"], capture_output=True)
+    subprocess.run(["git", "pull"], capture_output=True, cwd=BASE_DIR)
 
 def search_file(file_path, search_str):
     try:
