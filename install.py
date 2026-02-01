@@ -38,11 +38,6 @@ def main():
 
     print("Installing dependencies...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-    install_cmd = [sys.executable, "-m", "pip", "install"]
-    if not virtual_environment():
-        install_cmd.append("--user")
-    install_cmd.append(".")
-    subprocess.check_call(install_cmd)
 
     if system == "Windows":
         bin_dir = os.path.expandvars(r"%USERPROFILE%\bin")
