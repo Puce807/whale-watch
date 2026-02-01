@@ -15,6 +15,12 @@ def path_in_env(path):
     paths = os.environ.get("PATH", "").split(os.pathsep)
     return any(os.path.abspath(path) == os.path.abspath(p) for p in paths)
 
+def virtual_environment():
+    if "VIRTUAL_ENV" in os.environ:
+        return True
+    else:
+        return False
+
 def main():
     print("Installing Whale Watch...")
 
@@ -23,7 +29,7 @@ def main():
     cmd_name = CMD_NAME
     system = platform.system()
 
-    if "VIRTUAL_ENV" not in os.environ:
+    if not virtual_environment():
         print("WARNING: Using a virtual environment is highly recommended")
         if input("Would you like to continue? [y/n]").lower() == "n":
             sys.exit(1)
@@ -32,7 +38,11 @@ def main():
 
     print("Installing dependencies...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "."])
+    install_cmd = [sys.executable, "-m", "pip", "install"]
+    if not virtual_environment():
+        install_cmd.append("--user")
+    install_cmd.append(".")
+    subprocess.check_call(install_cmd)
 
     if system == "Windows":
         bin_dir = os.path.expandvars(r"%USERPROFILE%\bin")
