@@ -30,7 +30,7 @@ STATUS_COLORS = {
 
 CONTAINER_STATUS = ["all", "created", "restarting", "running", "removing", "paused", "exited", "dead"]
 
-CACHE_PATH = "cache.json"
+CACHE_PATH = "cache.json" # Note: Is relative to project directory
 
 CMD_NAME = "ww" # If you would like to change the command used to access whale watch, this must be changed before install.py is run
 

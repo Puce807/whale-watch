@@ -143,6 +143,8 @@ if __name__ == "__main__":
         client = ""
     console = Console()
 
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    CACHE_PATH = os.path.join(BASE_DIR, CACHE_PATH)
     if file_exists(CACHE_PATH):
         cache = read_json(CACHE_PATH)
     else:
