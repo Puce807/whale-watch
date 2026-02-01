@@ -114,27 +114,39 @@ def stats(status):
               help="Only print summary")
 @click.option("-t", "--timeout", default="60", type=click.IntRange(0, 600),
               help="Timeout in seconds, 0 = No timeout")
-def scan(drive, quiet, timeout):
+@click.option("-r", "--refresh", default=False, is_flag=True,
+              help="Ignore existing cache")
+@click.option("-n", "--no-cache", default=False, is_flag=True,
+              help="Do not save results to cache")
+@click.option("-a", "--all", default=False, is_flag=True,
+              help="Scan every directory included ignored")
+@click.option("-j", "--json", default=False, is_flag=True,
+              help="Prints result as JSON")
+@click.option("-R", "--roots", default=[], multiple=True,
+              help="Root directories to scan")
+@click.option("-s", "--source", default=False, is_flag=True,
+              help="Print how the program found the compose file")
+def scan(drive, quiet, timeout, refresh, no_cache, scan_all, print_json, roots, source):
     """Scan system for docker compose files"""
-    # TODO: Add Flags
-    # TODO: Add caching
-    if drive == "all":
-        drives = discover_drives()
+    roots_list = list(roots)
+    if len(roots_list) > 0:
+        starts = roots_list
+    elif drive == "all":
+        starts = discover_drives()
     else:
-        drives = [f"{drive}:\\"]
+        starts = [f"{drive}:\\"]
     container_names = named_containers.keys()
-    if quiet:
-        compose_dict = scan_compose(console, drives, container_names, cache, True, timeout)
-    else:
-        compose_dict = scan_compose(console, drives, container_names, cache, timeout=timeout)
+    compose_dict = scan_compose(console, starts, container_names, cache, quiet, timeout, refresh, scan_all, source)
+    if print_json: print(compose_dict)
 
-    to_write = {}
-    for name, path in compose_dict.items():
-        container_id = named_containers[name]["id"]
-        is_compose = path is not None
-        to_write[name] = {"id": container_id, "compose": is_compose, "compose_path": path}
-    cache_dict = cache | to_write
-    write_json(cache_dict, CACHE_PATH)
+    if not no_cache:
+        to_write = {}
+        for name, path in compose_dict.items():
+            container_id = named_containers[name]["id"]
+            is_compose = path is not None
+            to_write[name] = {"id": container_id, "compose": is_compose, "compose_path": path}
+        cache_dict = cache | to_write
+        write_json(cache_dict, CACHE_PATH)
 
 if __name__ == "__main__":
     try: client = docker.from_env()

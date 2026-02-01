@@ -107,7 +107,7 @@ def mark_complete(target, path, found, return_dict):
     return_dict[target] = path
     return found +1, True
 
-def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
+def scan_compose(console, starts, targets, cache, quiet=False, timeout=60, refresh=False, scan_all=False, source=False):
     # TODO: Add flags, including one to add debug to show source
     stack = [str(s) for s in starts]
 
@@ -132,13 +132,16 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
     is_found = False
     orphans = []
     killed_by_timeout = False
+    sources = {}
 
-    for target in targets:
-        compose_path = cache.get(target, {}).get("compose_path")
-        if compose_path is not None:
-            if file_exists(compose_path):
-                return_dict[target] = compose_path
-                found += 1
+    if not refresh:
+        for target in targets:
+            compose_path = cache.get(target, {}).get("compose_path")
+            if compose_path is not None:
+                if file_exists(compose_path):
+                    return_dict[target] = compose_path
+                    sources[target] = "Cache"
+                    found += 1
 
     with Live(console=console, refresh_per_second=12) as live:
         while stack:
@@ -157,7 +160,7 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
                         path_obj = Path(entry.path)
 
                         if entry.is_dir(follow_symlinks=False):
-                            if path_obj.name.lower() not in IGNORE_DIRECTORIES:
+                            if path_obj.name.lower() not in IGNORE_DIRECTORIES or scan_all:
                                 stack.append(entry.path)
                             continue
 
@@ -176,9 +179,11 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
                                     for candidate in candidates:
                                         if search_file(entry.path, candidate):
                                             found, is_found = mark_complete(target, entry.path, found, return_dict)
+                                            sources[target] = "Scan"
                                             break
                                         if candidate == project and get_parent_dir(entry.path) == project:
                                             found, is_found = mark_complete(target, entry.path, found, return_dict)
+                                            sources[target] = "Scan"
                                             break
 
                             if is_found:
@@ -237,7 +242,10 @@ def scan_compose(console, starts, targets, cache, quiet=False, timeout=60):
         log(f"Warning: Found {len(orphans)} orphaned compose files at: ", 1)
         for path in orphans:
             log(f"- {path}", 1)
-    print(cache)
+    if source:
+        print("Compose file sources:")
+        for container, compose_source in sources.items():
+            print(f"{container}: {compose_source}")
 
     return return_dict
 

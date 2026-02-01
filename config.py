@@ -34,4 +34,4 @@ CACHE_PATH = "cache.json" # Note: Is relative to project directory
 
 CMD_NAME = "ww" # If you would like to change the command used to access whale watch, this must be changed before install.py is run
 
-VERSION = "0.3.7"
+VERSION = "0.3.71"
